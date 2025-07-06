@@ -4,6 +4,12 @@
  * @param {import('@twilio-labs/serverless-runtime-types/types').ServerlessCallback} callback
  */
 exports.handler = async function (context, event, callback) {
+  // Extract ConversationSid from x-session-id header
+  const [serviceSid, conversationsSid] = event.request.headers["x-session-id"]
+    ?.replace("conversations__", "")
+    .split("/");
+  
+  console.log("Flex handover initiated for Conversation:", conversationsSid);
   const client = context.getTwilioClient();
 
   const FLEX_WORKFLOW_SID = event.FlexWorkflowSid || context.FLEX_WORKFLOW_SID;
@@ -18,9 +24,6 @@ exports.handler = async function (context, event, callback) {
     );
   }
 
-  const [serviceSid, conversationsSid] = event.request.headers["x-session-id"]
-    ?.replace("conversations__", "")
-    .split("/");
   const [traitName, identity] = event.request.headers["x-identity"]?.split(":");
 
   if (!identity || !conversationsSid) {
